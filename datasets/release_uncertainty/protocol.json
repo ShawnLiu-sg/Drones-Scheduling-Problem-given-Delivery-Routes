@@ -1,0 +1,29 @@
+{
+  "experiment": 6,
+  "seed": 20261124,
+  "N_per_case": 10000,
+  "distributions": [
+    "uniform",
+    "normal",
+    "laplace",
+    "gamma"
+  ],
+  "kappa": [
+    0.05,
+    0.1,
+    0.2
+  ],
+  "release": "max(0,ceil(r+sigma*epsilon))",
+  "scale": "max(1,kappa*r)",
+  "fixed_schedule": true,
+  "seed_rule": "First 16 SHA256 bytes of UTF-8 str(20261124)+'|'+scenario_id, unsigned big-endian; PCG64",
+  "nominal_inputs": "../main/manifest.json",
+  "residual_distributions": {
+    "uniform": "U[-sqrt(3),sqrt(3)]",
+    "normal": "standard Gaussian",
+    "laplace": "Laplace(0,1/sqrt(2))",
+    "gamma": "(G-4)/2, G ~ Gamma(shape=4,scale=1)"
+  },
+  "coupling": "One PCG64 uniform array per scenario. Reuse each draw across the four distributions and three strengths, independent across parcels. Array columns follow route order, then parcel order in each input.",
+  "success": "Actual release time of every late parcel is no greater than the departure time of its assigned replenishment flight in the user-supplied fixed schedule."
+}
