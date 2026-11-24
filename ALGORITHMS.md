@@ -12,7 +12,7 @@ The solver accepts the input JSON, reads the truck stops, delivery sorties and p
 
 | Method | Model or algorithm |
 | --- | --- |
-| full | Optional-interval primal search, mandatory interval-workload capacity bounds and cumulative threshold search |
+| full | Optional-interval primal search, A3 interval-capacity bounds with four-tick delay segments and dynamic observation intervals, then cumulative threshold search |
 | base | Threshold search with both optional components disabled |
 | no_interval | Only the interval-capacity strengthening component |
 | no_capacity | Only optional-interval search |
@@ -28,6 +28,8 @@ The solver accepts the input JSON, reads the truck stops, delivery sorties and p
 | makespan | Absolute threshold algorithm for latest truck or shared-drone return |
 | endurance | Fixed-plan replay, retiming, new dispatch construction, physical feasibility and absolute-return-threshold feasibility |
 | release | Monte Carlo and analytical probabilities under four laws and three perturbation scales, given a locally generated plan |
+
+In the capacity stage, the solver first computes the layered load bound. If that bound leaves the global gap open without improving the entry lower bound, it uses the remaining capacity-stage time to search for common-stop batches. A completed local proof can strengthen an interval coefficient or exclude a delay segment. A local search that reaches its time or node limit retains the layered bound. The result records the gate decision under `stats.energy_details.batch_gate` when the capacity stage runs.
 
 For a historical prescribed-handoff comparison, extract the policy and run the fixed-policy model:
 

@@ -85,6 +85,7 @@ def delay_solve(problem,method,cap,warm,start):
     if cap==0:
         return dict(status="limit",bound=lower,objective=upper,plan=warm)
     if method in ("full","base","no_interval","no_capacity"):
+        problem["_capacity_reference_lower"] = lower
         # As in the timed experiment, check the cutoff during wide time-index builds.
         deadline=perf_counter()+cap
         original_clock=compact_flow.Clock
