@@ -11,7 +11,7 @@ from time import perf_counter
 from scheduling import ablation, compact_flow, endurance, hybrid, liu_flow, makespan, relaxation
 from scheduling.study import model, reference
 
-METHODS = ("full","base","no_interval","no_capacity","liu","graph_a","price_d",
+METHODS = ("full","base","no_interval","no_capacity","liu","liu_budget","graph_a","price_d",
            "reference","fixed_policy","interval","compact","cbs","cbs_dp","pilot_milp","makespan",
            "endurance","release","price_original","price_filter","price_signature",
            "price_closure","price_all","price_core","price_adaptive","price_milp")
@@ -110,6 +110,9 @@ def delay_solve(problem,method,cap,warm,start):
                 result=ablation.solve(problem,cap,1,arm="no_capacity" if method=="base" else method)
         finally:
             del compact_flow.range
+    elif method=="liu_budget":
+        from scheduling import liu_budget
+        result=liu_budget.solve(problem,cap,1)
     elif method=="fixed_policy":
         result=reference.solve(problem,cap,1,fixed_assignments=problem["fixed_policy"])
         if result["routes"] is not None and [p["assign"] for p in result["routes"]]!=problem["fixed_policy"]:

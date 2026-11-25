@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from time import perf_counter
 
 from scheduling import hybrid
-from scheduling.certificate import _event_envelope
 
 
 _full_solve = hybrid.solve
@@ -70,22 +69,11 @@ def solve(instance, time_limit=120, threads=1, *, progress=None, arm):
                                             lower=result["bound"], upper=result["objective"])
             return result
 
-        def individual_bounds(problem, **_kwargs):
-            # Retain the initial event-network relaxation used before the
-            # mandatory-load classifications and interval-capacity master.
-            local = []
-            for route in problem["routes"]:
-                early, _, _, departure, _ = _event_envelope(route)
-                local.append(max(0, early[departure[-1]] - route["base"]))
-            bound = sum(local)
-            return dict(bound=bound, route_bounds=local,
-                        other_bounds=[bound-lb for lb in local], intervals=[])
-
         def without_capacity(env, problem, setup, budget, deadline, threads, *, energy=None):
             return original_trial(env, problem, setup, budget, deadline, threads, energy=None)
 
         with patch_attribute(hybrid.interval_exact, "solve", timed_interval), \
-             patch_attribute(hybrid, "energy_cuts", individual_bounds), \
+             patch_attribute(hybrid, "energy_cuts", hybrid._individual_bounds), \
              patch_attribute(hybrid.threshold, "_trial", without_capacity):
             result = _full_solve(instance, time_limit, threads, progress=progress)
         omitted_prefix = "energy_"

@@ -199,13 +199,15 @@ def _trial(env, inst, setup, budget, deadline, threads, energy=None):
         return "solved" if m.Status == GRB.OPTIMAL else "limit",witness,bound,statistics
 
 
-def solve(instance,time_limit=120,threads=1,*,progress=None):
+def solve(instance,time_limit=120,threads=1,*,progress=None,trial=None):
     """Return a verified schedule and certified integer delay lower bound."""
     started = perf_counter()
     deadline = started + time_limit
     routes = instance["routes"]
     if "H" not in instance:
         return liu.solve(instance,time_limit,threads,progress=progress)
+    if trial is None:
+        trial = _trial
     best = instance.get("warm")
     upper = liu.validate(instance,best) if best is not None else None
     lower = 0
@@ -239,7 +241,7 @@ def solve(instance,time_limit=120,threads=1,*,progress=None):
         env.start()
         while perf_counter() < deadline:
             try:
-                status,witness,lb,stats = _trial(env,instance,(bases,latest,lbs),budget,deadline,threads)
+                status,witness,lb,stats = trial(env,instance,(bases,latest,lbs),budget,deadline,threads)
             except TimeoutError:
                 break
             trials.append(dict(budget=budget,status=status,**stats))
